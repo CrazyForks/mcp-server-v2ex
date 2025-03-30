@@ -1,0 +1,37 @@
+{
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "rimraf": "^6.0.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
+  },
+  "name": "mcp-server-v2ex",
+  "version": "0.1.0",
+  "description": "",
+  "main": "dist/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node dist/index.js",
+    "build": "tsc --outDir dist",
+    "dev": "tsc-node src/index.ts",
+    "clean": "rimraf dist",
+    "cb": "npm run clean && npm run build",
+    "package": "npm run clean && npm run build && npm pack"
+  },
+  "repository": {
+    "type": "git",
+    "url": "ftfl:funnythingfunnylove/mcp-server-v2ex.git"
+  },
+  "keywords": [
+    "v2ex",
+    "mcp",
+    "server"
+  ],
+  "author": "fenglei",
+  "license": "MIT",
+  "type": "commonjs"
+}
