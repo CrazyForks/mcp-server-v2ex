@@ -5,13 +5,7 @@ import {
     CallToolRequestSchema,
     ListToolsRequestSchema,
     Tool
-
 } from "@modelcontextprotocol/sdk/types.js"
-import { object } from "zod";
-
-interface GetMemberArgs {
-    user_id: string;
-}
 
 interface GetUserNotificationsArgs {
     page: number;
@@ -21,9 +15,6 @@ interface RemoveNotificationsArgs {
     notification_id: string;
 }
 
-interface GetCurrentTokenArgs {
-
-}
 
 interface CreateNewTokenArgs {
     scope: string;
@@ -119,7 +110,7 @@ const GetNodeTopicTool: Tool  = {
             },
             page: {
                 type: "number",
-                description: "page number for current node topics, default is 1",
+                description: "page number for current node topics list, default is 1",
                 default: 1
             }
         },
@@ -164,8 +155,229 @@ const GetTopicComentsTool : Tool = {
 
 
 class V2exClient {
+    private botHeader : { Authorziation: string, "Content-Type": string};
     
+    constructor (botToken: string){
+        this.botHeader = {
+            Authorziation: `Bearer ${botToken}`,
+            "Content-Type": "application/json"
+        };
+    }
+
+    async GetMember(): Promise<any> {
+        const response = await fetch(
+            `https://https://www.v2ex.com/api/v2/member`,{headers: this.botHeader},
+        );
+
+        return response.json();
+    }
+
+    async GetNotification(page: number): Promise<any> {
+        const response = await fetch(
+            `https://www.v2ex.com/api/v2/notifications?p=${page}`,{headers: this.botHeader},
+        );
+
+        return response.json();
+    }
+
+    async RemoveNotification(notification_id: string): Promise<any> {
+        const response = await fetch(
+            `https://www.v2ex.com/api/v2/notifications/${notification_id}`,{headers: this.botHeader},
+        );
+
+        return response.json();
+    }
+
+    async GetNode(node_name: string): Promise<any> {
+        const response = await fetch(
+            `https://www.v2ex.com/api/v2/nodes/${node_name}`,{headers: this.botHeader},
+        );
+
+        return response.json();
+    }
+
+    async GetNodeTopic(node_name: string, page: number): Promise<any> {
+        const response = await fetch(
+            `https://www.v2ex.com/api/v2/nodes/${node_name}/topics?p=${page}`,{headers: this.botHeader},
+        );
+        return response.json();
+    }
+
+    async GetTopic (topic_id: number): Promise<any> {
+        const response = await fetch(
+            `https://www.v2ex.com/api/v2/topics/${topic_id}`,{headers: this.botHeader},
+        );
+        return response.json();
+    }
+
+    async GetTopicComments (topic_id: number, page: number): Promise<any> {
+        const response = await fetch(
+            `https://www.v2ex.com/api/v2/topics/${topic_id}/comments?p=${page}`,{headers: this.botHeader},
+            );
+        return response.json();
+    }
+    
+    async GetCurrentToken(): Promise<any> {
+        const response = await fetch(
+            `https://www.v2ex.com/api/v2/tokens`,{headers: this.botHeader},
+        );
+        return response.json();
+    }
+
+    async CreateNewToken(scope: string, expiration: number): Promise<any> {
+        const response = await fetch(
+            `https://www.v2ex.com/api/v2/tokens`,{headers: this.botHeader, method: "POST", body: JSON.stringify({scope: scope, expiration: expiration})},
+        );
+        return response.json();
+    }
+}
+
+async function main() {
+    const  botToken = process.env.V2EX_API_KEY;
+
+    if (!botToken) {
+        console.error("Please set V2EX_API_KEY environment variable in mcp config files.");
+        process.exit(1);
+    }
+
+    console.error("start mcp server for v2ex");
+    const server = new Server(
+        {name: "V2ex MCP server", version: "0.1.0"},
+        {
+            capabilities: {
+                tools: {},
+            },
+        },
+
+    );
+
+    const v2exClient = new V2exClient(botToken);
+    server.setRequestHandler(
+        CallToolRequestSchema,
+        async(request: CallToolRequest) => {
+            console.error("Recevied CallToolRequest:", request);
+            try {
+                if (!request.params.arguments) {
+                    throw new Error("No argument provied");
+                }
+                switch (request.params.name){
+                    case "v2ex_notification": {
+                        const args = request.params.arguments as unknown as GetUserNotificationsArgs;
+                        const response = await v2exClient.GetNotification(
+                            args.page
+                        );
+                        return {
+                            content: [{type:"text", text: JSON.stringify(response)}],
+                        };
+                    }
+                    case "v2ex_remove_notification": {
+                        const args = request.params.arguments as unknown as RemoveNotificationsArgs;
+                        const response = await v2exClient.RemoveNotification(
+                            args.notification_id
+                        );
+                        return {
+                            content: [{type:"text", text: JSON.stringify(response)}],
+                        };
+                    }
+                    case "v2ex_member_profile": {
+                        const response = await v2exClient.GetMember();
+                        return {
+                            content: [{type:"text", text: JSON.stringify(response)}],
+                        };
+                    }
+                    case "v2ex_node": {
+                        const args = request.params.arguments as unknown as GetNodeArgs;
+                        const response = await v2exClient.GetNode(
+                            args.node_name
+                        );
+                        return {
+                            content: [{type:"text", text: JSON.stringify(response)}],
+                        };
+                    }
+                    case "v2ex_node_topic": {
+                        const args = request.params.arguments as unknown as GetNodeTopicArgs;
+                        const response = await v2exClient.GetNodeTopic(
+                            args.node_name,
+                            args.page
+                        );
+                        return {
+                            content: [{type:"text", text: JSON.stringify(response)}],
+                        };
+                    }
+                    case "v2ex_topic": {
+                        const args = request.params.arguments as unknown as GetTopicArgs;
+                        const response = await v2exClient.GetTopic(
+                            args.topic_id
+                        );
+                        return {
+                            content: [{type:"text", text: JSON.stringify(response)}],
+                        };
+                    }
+                    case "v2ex_topic_comments": {
+                        const args = request.params.arguments as unknown as GetTopicCommentsArgs;
+                        const response = await v2exClient.GetTopicComments(
+                            args.topic_id,
+                            args.page
+                        );
+                        return {
+                            content: [{type:"text", text: JSON.stringify(response)}],
+                        };
+                    }
+                    case "v2ex_current_token": {
+                        const response = await v2exClient.GetCurrentToken();
+                        return {
+                            content: [{type:"text", text: JSON.stringify(response)}],
+                        };
+                    }
+                    case "v2ex_create_new_token": {
+                        const args = request.params.arguments as unknown as CreateNewTokenArgs;
+                        const response = await v2exClient.CreateNewToken(
+                            args.scope,
+                            args.expiration
+                        );
+                        return {
+                            content: [{type:"text", text: JSON.stringify(response)}],
+                        };
+                    }
+                    default: {
+                        throw new Error("Unsupported tool name");
+                    }
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                return {
+                    content: [{type:"text", text: JSON.stringify({error: error instanceof Error ? error.message : String(error)})}],
+                };
+            }
+        },
+    );
+
+    server.setRequestHandler(ListToolsRequestSchema, async() => {
+        console.error("Recevied ListToolsRequest");
+
+        return {
+            tools: [
+                GetNotificationTool,
+                RemoveNotificationTool,
+                GetProfileTool,
+                GetNodeTool,
+                GetNodeTopicTool,
+                GetTopicTool,
+                GetTopicComentsTool,
+            ],
+        };
+    });
+
+    const transport = new StdioServerTransport();
+    console.error("Connect server to transport...");
+    await server.connect(transport);
+
+    console.error("V2ex MCP server Running in stdio.");
 }
 
 
+main().catch((error) => {
+    console.error("Fatal error in main():", error);
+    process.exit(1);
+});
 

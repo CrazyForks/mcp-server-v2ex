@@ -1,0 +1,7 @@
+GET https://www.v2ex.com/api/v2/member
+Authorization: Bearer ff46d5a3-5ce1-441b-9fcf-915372d27286
+
+###
+
+GET https://www.v2ex.com/api/v2/notifications?p=1
+Authorization: Bearer ff46d5a3-5ce1-441b-9fcf-915372d27286
