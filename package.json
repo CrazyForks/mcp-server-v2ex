@@ -11,7 +11,7 @@
   },
   "name": "mcp-server-v2ex",
   "version": "0.1.0",
-  "description": "",
+  "description": "v2ex mcp server for v2ex api 2.0",
   "main": "dist/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -24,7 +24,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "ftfl:funnythingfunnylove/mcp-server-v2ex.git"
+    "url": "git@github.com:funnythingfunnylove/mcp-server-v2ex.git"
   },
   "keywords": [
     "v2ex",
@@ -40,5 +40,6 @@
   "author": "fenglei",
   "email": "mail@fenglei.me",
   "license": "MIT",
-  "type": "module"
+  "type": "module",
+  "homepage": "https://github.com/funnythingfunnylove/mcp-server-v2ex"
 }

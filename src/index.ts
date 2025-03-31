@@ -153,20 +153,53 @@ const GetTopicComentsTool : Tool = {
     }
 };
 
+const GetCurrentTokenTool : Tool = {
+    name: "v2ex_current_token",
+    description: "get v2ex current user token",
+    inputSchema: {
+        type: "object",
+        properties: {
+            
+        },
+        required: []
+    }
+};
+
+const CreateNewTokenTool : Tool = {
+    name: "v2ex_create_new_token",
+    description: "create v2ex user new token",
+    inputSchema: {
+        type: "object",
+        properties: {
+            scope: {
+                type: "string",
+                description: "v2ex token scope",
+                default: "everything",
+            },
+            expiration: {
+                type: "number",
+                description: "v2ex token expiration",
+            }
+        },
+        required: ["scope", "expiration"]
+    }
+};
+
+
 
 class V2exClient {
-    private botHeader : { Authorziation: string, "Content-Type": string};
+    private botHeader : { Authorization: string, "Content-Type": string};
     
     constructor (botToken: string){
         this.botHeader = {
-            Authorziation: `Bearer ${botToken}`,
-            "Content-Type": "application/json"
+            Authorization: `Bearer ${botToken}`,
+            "Content-Type": "application/json",
         };
     }
 
     async GetMember(): Promise<any> {
         const response = await fetch(
-            `https://https://www.v2ex.com/api/v2/member`,{headers: this.botHeader},
+            `https://www.v2ex.com/api/v2/member`,{headers: this.botHeader},
         );
 
         return response.json();
@@ -212,14 +245,14 @@ class V2exClient {
 
     async GetTopicComments (topic_id: number, page: number): Promise<any> {
         const response = await fetch(
-            `https://www.v2ex.com/api/v2/topics/${topic_id}/comments?p=${page}`,{headers: this.botHeader},
+            `https://www.v2ex.com/api/v2/topics/${topic_id}/replies?p=${page}`,{headers: this.botHeader},
             );
         return response.json();
     }
     
     async GetCurrentToken(): Promise<any> {
         const response = await fetch(
-            `https://www.v2ex.com/api/v2/tokens`,{headers: this.botHeader},
+            `https://www.v2ex.com/api/v2/token`, {headers: this.botHeader},
         );
         return response.json();
     }
@@ -257,9 +290,9 @@ async function main() {
         async(request: CallToolRequest) => {
             console.error("Recevied CallToolRequest:", request);
             try {
-                if (!request.params.arguments) {
-                    throw new Error("No argument provied");
-                }
+                // if (!request.params.arguments) {
+                //     throw new Error("No argument provied");
+                // }
                 switch (request.params.name){
                     case "v2ex_notification": {
                         const args = request.params.arguments as unknown as GetUserNotificationsArgs;
@@ -364,6 +397,9 @@ async function main() {
                 GetNodeTopicTool,
                 GetTopicTool,
                 GetTopicComentsTool,
+                GetCurrentTokenTool,
+                CreateNewTokenTool,
+                
             ],
         };
     });
