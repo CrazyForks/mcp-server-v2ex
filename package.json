@@ -12,7 +12,7 @@
     "zod": "^3.24.2"
   },
   "name": "mcp-server-v2ex",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "v2ex mcp server for v2ex api 2.0",
   "main": "dist/index.js",
   "scripts": {

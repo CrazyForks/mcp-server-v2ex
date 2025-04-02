@@ -4,7 +4,12 @@ import {
     CallToolRequest,
     CallToolRequestSchema,
     ListToolsRequestSchema,
-    Tool
+    Tool,
+    ListPromptsRequestSchema,
+    Prompt,
+    GetPromptRequestSchema,
+    GetPromptRequest,
+    GetPromptResult,
 } from "@modelcontextprotocol/sdk/types.js"
 
 interface GetUserNotificationsArgs {
@@ -38,6 +43,96 @@ interface GetTopicCommentsArgs {
     topic_id: number;
     page: number;
 }
+
+// set default settings prompts about v2ex
+const prompt_get_today_new_topics_in_some_node: Prompt = {
+    name: "get-today-new-topics-in-some-node",
+        description: "from given nodes name get new topic in each node",
+        arguments:[
+            {
+                name: "node-names",
+                description: "list of node names",
+                type: "string",
+                required: true
+            }
+        ]
+};
+
+const prompt_summerize_today_news_topic: Prompt = {
+    name: "summerize-today-news-topic",
+    description: `您是一位专业的中文新闻总结助手，专门负责分析和总结新闻话题记录。您的主要任务是从繁杂的群聊中提取关键信息，生成一份全面、简洁且易读的群聊报告。这份报告旨在帮助群成员快速了解当天的主要讨论内容，不错过重要信息。在v2ex上获取 qna,share,create,ideas 四个节点的新话题，并获取每个话题的回复, 并总结
+，仔细阅读每个话题的总结，并按照以下详细指南创建一份高质量的今日总结报告：
+
+报告标题： "今日V2EX热点"
+
+重要提醒（如果有）：
+
+在报告最上方，使用"❗️重要提醒"标注任何置顶或 @所有人 这种需要所有成员注意的信息
+简明扼要地陈述提醒内容，确保醒目
+话题概要： 分析并总结，请提供以下信息：
+
+今日热门话题
+
+[话题标题] ☆☆☆
+时间点：HH:MM - HH:MM
+内容摘要： [100-140字的讨论内容概括] ☑ 点评：[20-30字的简短评论]
+[重复上述格式，呈现5个主要话题]
+
+· 趣味互动
+
+[如有趣味性的互动，在此处简要描述]
+· 工具及其观点看法
+
+[如有人寻求推荐或者请求对某件事的看法，在此处简要描述问题和观点]
+· 待跟进事项
+
+[负责人]：[具体任务] (截止日期：MM月DD日) [列出所有需要跟进的事项]
+· 其他讨论话题
+
+· 发言人字数统计
+【每日发言字数变化】：
+[ASCII-art 统计图表]
+【总体发言字数】：xxx字
+【整体发言字数统计】
+[成员 发言字数统计]
+
+其中[ASCII-art 统计图表]使用以下示例形式:
+
+· 发言人字数统计
+
+【每日发言字数变化】：
+2025-03-15 | ####### 7000字
+2025-03-16 | ######## 8500字
+2025-03-17 | ##### 5000字
+2025-03-18 | ######### 9500字
+2025-03-19 | ###### 6000字
+
+
+[如果有更多话题，在此简要列出]
+· 结语 [简短的总结语，鼓励继续积极参与讨论]
+
+在分析记录时，请特别注意以下几点：
+识别并关注高频词汇和反复出现的主题
+留意群成员的情绪变化和互动模式
+捕捉讨论中的转折点和关键决策时刻
+在处理敏感话题时：
+使用中性语言描述，避免偏袒任何一方
+如果话题过于敏感，可以概括性地提及而不深入细节
+必要时，可以咨询群管理员如何处理特定的敏感信息
+提高报告的实用性：
+对于技术性讨论，可以添加简短的解释或背景信息
+
+为重要信息或关键结论添加醒目的标记，如"💡关键点"或"🌟亮点"
+您的目标是创建一份既全面又易读、既专业又富有人情味的新闻话题总结报告。通过您的工作，帮助用户更好的了解v2ex动态`,
+    arguments: []
+};
+
+
+const PROMPTS : {[key: string]: Prompt} = {
+    "get-today-new-topics-in-some-node" : prompt_get_today_new_topics_in_some_node,
+    "summerize-today-news-topic": prompt_summerize_today_news_topic,
+};
+
 
 const GetNotificationTool: Tool  = {
     name: "v2ex_notification",
@@ -231,21 +326,21 @@ class V2exClient {
 
     async GetNodeTopic(node_name: string, page: number): Promise<any> {
         const response = await fetch(
-            `https://www.v2ex.com/api/v2/nodes/${node_name}/topics?p=${page}`,{headers: this.botHeader},
+            `https://www.v2ex.com/api/v2/nodes/${node_name}/topics?p=${page.toString()}`,{headers: this.botHeader},
         );
         return response.json();
     }
 
     async GetTopic (topic_id: number): Promise<any> {
         const response = await fetch(
-            `https://www.v2ex.com/api/v2/topics/${topic_id}`,{headers: this.botHeader},
+            `https://www.v2ex.com/api/v2/topics/${topic_id.toString()}`,{headers: this.botHeader},
         );
         return response.json();
     }
 
     async GetTopicComments (topic_id: number, page: number): Promise<any> {
         const response = await fetch(
-            `https://www.v2ex.com/api/v2/topics/${topic_id}/replies?p=${page}`,{headers: this.botHeader},
+            `https://www.v2ex.com/api/v2/topics/${topic_id}/replies?p=${page.toString()}`,{headers: this.botHeader},
             );
         return response.json();
     }
@@ -279,6 +374,7 @@ async function main() {
         {
             capabilities: {
                 tools: {},
+                prompts: {}
             },
         },
 
@@ -404,6 +500,41 @@ async function main() {
         };
     });
 
+    server.setRequestHandler(ListPromptsRequestSchema, async() => {
+        console.error("Recevied ListPromptsRequest");
+        return {
+            prompts: Object.values(PROMPTS),
+        };
+    });
+
+    server.setRequestHandler(GetPromptRequestSchema, async(request: GetPromptRequest): Promise<GetPromptResult> => {
+        console.error("Recevied GetPromptRequest:", request);
+        const prompt = PROMPTS[request.params.name];
+        if (!prompt) {
+            throw new Error(`Prompt not found: ${request.params.name}`);
+        };
+        switch (request.params.name){
+            case "get-today-new-topics-in-some-node": {
+                return {
+                    messages: [{
+                        role: "user",
+                        content: {type:"text", text: JSON.stringify(prompt)},
+                    }],
+                };
+            }
+            case "summerize-today-news-topic": {
+                return {
+                    messages: [{
+                        role: "user",
+                        content: {type:"text", text: JSON.stringify(prompt)},
+                    }],
+                };
+            }
+            default: {
+                throw new Error("Unsupported prompt name");
+            };
+        };
+    });
     const transport = new StdioServerTransport();
     console.error("Connect server to transport...");
     await server.connect(transport);
