@@ -3,6 +3,7 @@
 ## Description
 This mcp server simply wrap the offical Api 2.0, implement all api actions.
 
+
 ## Feature
 - notifications  获取最新提醒
 - delete notifications 删除指定提醒
@@ -31,6 +32,14 @@ This mcp server simply wrap the offical Api 2.0, implement all api actions.
       }
      }
 ```
+
+## Change log
+- v0.1.1  /  2025.04.02
+    - 新增今日热点总结
+    ![img](./img/v2ex_today_summerize.png)
+- v0.1.0
+    - 完成基本功能实现
+
 ## Plan
 - Considering add daily hot topic simply via ask what hot topic in v2ex in claude desktop.
 
