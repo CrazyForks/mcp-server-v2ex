@@ -5,6 +5,8 @@
 
 The project is designed as a reusable integration layer for general-purpose agents rather than a client-specific plugin, so it can be connected to Claude Desktop, Codex, and other tools that support the Model Context Protocol.
 
+For Chinese documentation, see [README.zh-CN.md](./README.zh-CN.md).
+
 ## Available tools
 - `notifications`: Fetch the latest notifications
 - `delete_notifications`: Delete selected notifications
@@ -17,8 +19,6 @@ The project is designed as a reusable integration layer for general-purpose agen
 - `topic_comments`: Get replies for a topic
 - `daily_summary`: Generate a summary of recent hot topics
 
-中文补充：以上工具面向 MCP-compatible agents 暴露，便于在支持 MCP 的客户端或代理框架中直接调用。
-
 ## Installation
 Install the package from npm:
 
@@ -28,8 +28,6 @@ npm install -g mcp-server-v2ex
 
 ## Configuration
 First, create or retrieve a V2EX API token from [V2EX token settings](https://www.v2ex.com/settings/tokens).
-
-中文补充：先到上面的页面生成自己的 V2EX token，再把它放进下面的环境变量里。
 
 Example MCP client configuration:
 
@@ -48,7 +46,7 @@ Example MCP client configuration:
 }
 ```
 
-中文提示：`NODE_TLS_REJECT_UNAUTHORIZED=0` 只适用于少数本地网络场景，例如使用 MITM 代理工具时。除非你清楚它的安全影响，否则不要启用。
+`NODE_TLS_REJECT_UNAUTHORIZED=0` is only useful in special local networking setups, such as MITM proxy tooling. Do not enable it unless you understand the security tradeoff.
 
 ## Changelog
 - `v0.1.1` / `2025-04-02`
