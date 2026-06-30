@@ -1,7 +1,9 @@
-# Mcp-server-v2ex
+# mcp-server-v2ex
 
 ## Description
-This mcp server simply wrap the offical Api 2.0, implement all api actions.
+`mcp-server-v2ex` is an MCP server that wraps the V2EX API 2.0 for MCP-compatible agents and developer tools. It exposes structured operations for notifications, token management, member profile lookup, node browsing, topic retrieval, comment retrieval, and daily hot-topic summaries.
+
+The project is designed as a reusable integration layer for general-purpose agents rather than a client-specific plugin, so it can be connected to Claude Desktop, Codex, and other tools that support the Model Context Protocol.
 
 
 ## Feature
